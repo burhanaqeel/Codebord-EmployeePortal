@@ -10,8 +10,28 @@ const poppins = Poppins({
 });
 
 export const metadata: Metadata = {
-  title: "Codebord Employees",
+  title: "Employee Portal - CodeBord",
   description: "Employee management system for Codebord",
+  keywords: "employee management, attendance, CodeBord, HR system",
+  authors: [{ name: "CodeBord Team" }],
+  creator: "CodeBord",
+  publisher: "CodeBord",
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  manifest: '/site.webmanifest',
+};
+
+export const viewport = {
+  themeColor: '#091e65',
+  colorScheme: 'light',
 };
 
 export default function RootLayout({

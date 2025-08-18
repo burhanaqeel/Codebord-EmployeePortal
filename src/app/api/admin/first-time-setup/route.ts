@@ -1,22 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Admin from '@/models/Admin';
-import { requireAdmin } from '@/lib/auth';
 
 export async function POST(request: NextRequest) {
   try {
-    // Connect to MongoDB first
+    // Connect to MongoDB
     await connectDB();
-    
-    // Check if this is the first admin (no authentication required)
+
+    // Check if any admin already exists
     const existingAdminCount = await Admin.countDocuments();
-    if (existingAdminCount === 0) {
-      // Allow first admin creation without authentication
-      console.log('First admin creation - bypassing authentication');
-    } else {
-      // Require authentication for subsequent admin creation
-      const auth = await requireAdmin(request);
-      if ('response' in auth) return auth.response;
+    if (existingAdminCount > 0) {
+      return NextResponse.json(
+        { error: 'Admin setup already completed. Use regular admin registration.' },
+        { status: 403 }
+      );
     }
 
     const { name, email, password, confirmPassword } = await request.json();
@@ -52,7 +49,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new admin
+    // Create the first admin
     const admin = new Admin({
       name: name.trim(),
       email: email.toLowerCase().trim(),
@@ -66,14 +63,14 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(
       { 
-        message: 'Admin registered successfully',
+        message: 'First admin created successfully! You can now log in.',
         admin: adminData
       },
       { status: 201 }
     );
 
   } catch (error: any) {
-    console.error('Admin registration error:', error);
+    console.error('First-time admin setup error:', error);
     
     if (error.name === 'ValidationError') {
       return NextResponse.json(
