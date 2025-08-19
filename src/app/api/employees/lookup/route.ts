@@ -24,10 +24,7 @@ export async function GET(request: NextRequest) {
     const employee = await Employee.findOne(query, {
       employeeId: 1,
       name: 1,
-      email: 1,
-      designation: 1,
-      department: 1,
-      status: 1,
+      profileImage: 1,
       _id: 0,
     });
 

@@ -173,12 +173,8 @@ export default function EditEmployeeForm({ onBack, onUpdateSuccess }: EditEmploy
     try {
       const formDataToSend = new FormData();
       
-      // Append all form fields except email (which should not be changed)
+      // Append all form fields (including email if changed by admin)
       Object.entries(formData).forEach(([key, value]) => {
-        if (key === 'email') {
-          // Skip email - it should not be changed
-          return;
-        }
         
         if (key === 'roles') {
           formDataToSend.append(key, JSON.stringify(value));
@@ -500,7 +496,7 @@ export default function EditEmployeeForm({ onBack, onUpdateSuccess }: EditEmploy
                     />
                   </div>
 
-                  {/* Employee Email (Read-only) */}
+                  {/* Employee Email (Editable) */}
                   <div className="space-y-2">
                     <label className="block text-sm font-semibold text-gray-700">
                       Employee Email Address
@@ -510,8 +506,8 @@ export default function EditEmployeeForm({ onBack, onUpdateSuccess }: EditEmploy
                         type="email"
                         name="email"
                         value={formData.email}
-                        readOnly
-                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-600"
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent transition-all duration-200 hover:border-gray-300"
                       />
                       <div className="absolute inset-y-0 right-0 flex items-center pr-3">
                         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -519,7 +515,7 @@ export default function EditEmployeeForm({ onBack, onUpdateSuccess }: EditEmploy
                         </svg>
                       </div>
                     </div>
-                    <p className="text-xs text-gray-500">Cannot be changed</p>
+                    <p className="text-xs text-gray-500">Changing email will immediately sign the employee out and send them a notification. Their password remains the same.</p>
                   </div>
 
                   {/* Date of Birth */}

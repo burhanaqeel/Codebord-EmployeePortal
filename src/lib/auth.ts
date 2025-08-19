@@ -151,6 +151,12 @@ export async function requireEmployee(request: NextRequest): Promise<{ employee:
     if (!employee) {
       return { response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
     }
+    // Invalidate sessions when tokenVersion mismatches (e.g., after password/email change)
+    const dbTokenVersion = (employee as any).tokenVersion || 0;
+    const tokenTokenVersion = payload.tokenVersion || 0;
+    if (tokenTokenVersion !== dbTokenVersion) {
+      return { response: NextResponse.json({ error: 'Session expired. Please log in again.' }, { status: 401 }) };
+    }
     return { employee };
   } catch (error) {
     return { response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };
@@ -177,7 +183,13 @@ export async function getAuthContext(request: NextRequest): Promise<
     if (payload) {
       await (await import('@/lib/mongodb')).default();
       const employee = await Employee.findOne({ employeeId: payload.employeeId });
-      if (employee) return { employee };
+      if (employee) {
+        const dbTokenVersion = (employee as any).tokenVersion || 0;
+        const tokenTokenVersion = payload.tokenVersion || 0;
+        if (tokenTokenVersion === dbTokenVersion) {
+          return { employee };
+        }
+      }
     }
   }
   return { response: NextResponse.json({ error: 'Unauthorized' }, { status: 401 }) };

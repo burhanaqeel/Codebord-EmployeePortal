@@ -3,6 +3,7 @@ import connectDB from '@/lib/mongodb';
 import Employee from '@/models/Employee';
 import { uploadImage, extractPublicIdFromUrl, deleteImage } from '@/lib/cloudinary';
 import { requireAdmin } from '@/lib/auth';
+import { sendEmployeeEmailUpdatedNotification } from '@/lib/email';
 
 export async function PUT(request: NextRequest) {
   try {
@@ -18,6 +19,7 @@ export async function PUT(request: NextRequest) {
     const _id = formData.get('_id') as string;
     const employeeId = formData.get('employeeId') as string;
     const name = formData.get('name') as string;
+    const email = (formData.get('email') as string) || '';
     const dob = formData.get('dob') as string;
     const dateOfJoining = formData.get('dateOfJoining') as string;
     const permanentAddress = formData.get('permanentAddress') as string;
@@ -48,6 +50,23 @@ export async function PUT(request: NextRequest) {
         { error: 'Employee not found' },
         { status: 404 }
       );
+    }
+
+    // Handle email change: if provided and different, ensure uniqueness and bump tokenVersion
+    let willEmailChange = false;
+    let newEmailNormalized: string | null = null;
+    if (email && typeof email === 'string' && email.trim().toLowerCase() !== existingEmployee.email.toLowerCase()) {
+      const normalized = email.trim().toLowerCase();
+      // check unique
+      const emailExists = await Employee.findOne({ email: normalized, _id: { $ne: _id } });
+      if (emailExists) {
+        return NextResponse.json(
+          { error: 'Another employee already uses this email address' },
+          { status: 409 }
+        );
+      }
+      willEmailChange = true;
+      newEmailNormalized = normalized;
     }
 
     // Check if employee ID is being changed and if it conflicts with another employee
@@ -105,24 +124,31 @@ export async function PUT(request: NextRequest) {
     }
 
     // Update employee
+    // Build update object
+    const updateDoc: any = {
+      employeeId,
+      name: name.trim(),
+      dob: new Date(dob),
+      dateOfJoining: new Date(dateOfJoining),
+      permanentAddress: permanentAddress.trim(),
+      designation: designation.trim(),
+      department: department.trim(),
+      roles: Array.isArray(roles) ? roles : [],
+      salary: parseFloat(salary),
+      status: status.trim(),
+      idCardFront: idCardFrontPath,
+      idCardBack: idCardBackPath,
+      offerLetter: offerLetterPath,
+      profileImage: profileImagePath,
+    };
+    if (willEmailChange && newEmailNormalized) {
+      updateDoc.email = newEmailNormalized;
+      updateDoc.tokenVersion = ((existingEmployee as any).tokenVersion || 0) + 1; // force logout
+    }
+
     const updatedEmployee = await Employee.findByIdAndUpdate(
       _id,
-      {
-        employeeId,
-        name: name.trim(),
-        dob: new Date(dob),
-        dateOfJoining: new Date(dateOfJoining),
-        permanentAddress: permanentAddress.trim(),
-        designation: designation.trim(),
-        department: department.trim(),
-        roles: Array.isArray(roles) ? roles : [],
-        salary: parseFloat(salary),
-        status: status.trim(), // Add status field
-        idCardFront: idCardFrontPath,
-        idCardBack: idCardBackPath,
-        offerLetter: offerLetterPath,
-        profileImage: profileImagePath
-      },
+      updateDoc,
       { new: true, runValidators: true }
     );
 
@@ -131,6 +157,20 @@ export async function PUT(request: NextRequest) {
         { error: 'Failed to update employee' },
         { status: 500 }
       );
+    }
+
+    // On email change, notify the new email and inform about logout
+    if (updatedEmployee && willEmailChange && newEmailNormalized) {
+      try {
+        await sendEmployeeEmailUpdatedNotification({
+          employeeId: updatedEmployee.employeeId,
+          name: updatedEmployee.name,
+          oldEmail: existingEmployee.email,
+          newEmail: newEmailNormalized,
+        });
+      } catch (notifyError) {
+        console.error('Failed to send employee email update notification:', notifyError);
+      }
     }
 
     // Return updated employee data without password

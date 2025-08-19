@@ -377,3 +377,80 @@ export function generateRandomPassword(length: number = 12): string {
   // Shuffle the password
   return password.split('').sort(() => Math.random() - 0.5).join('');
 }
+
+export interface EmployeeEmailUpdatedNotice {
+  employeeId: string;
+  oldEmail: string;
+  newEmail: string;
+  name: string;
+}
+
+export async function sendEmployeeEmailUpdatedNotification(notice: EmployeeEmailUpdatedNotice) {
+  try {
+    const { data, error } = await resend.emails.send({
+      from: process.env.RESEND_FROM_EMAIL || 'noreply@codebord.com',
+      to: [notice.newEmail],
+      subject: 'Your Codebord Employee Email Has Been Updated',
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Email Updated</title>
+          <style>
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; }
+            .container { background-color: white; border-radius: 10px; padding: 30px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); }
+            .header { text-align: center; margin-bottom: 30px; }
+            .logo { font-size: 28px; font-weight: bold; margin-bottom: 10px; }
+            .codebord-blue { color: #091e65; }
+            .codebord-red { color: #dc2626; }
+            .box { background-color: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; padding: 20px; margin: 20px 0; }
+            .row { margin: 10px 0; padding: 10px; background-color: white; border-radius: 5px; border-left: 4px solid #091e65; }
+            .label { font-weight: bold; color: #091e65; display: inline-block; width: 160px; }
+            .value { font-family: 'Courier New', monospace; background-color: #f1f3f4; padding: 2px 6px; border-radius: 3px; color: #333; }
+            .info { background-color: #e7f1ff; border: 1px solid #b6d4fe; border-radius: 5px; padding: 15px; margin: 20px 0; color: #084298; }
+            .footer { text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e9ecef; color: #6c757d; font-size: 14px; }
+            .login-button { display: inline-block; background: linear-gradient(135deg, #091e65 0%, #dc2626 100%); color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; margin: 20px 0; }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="header">
+              <div class="logo"><span class="codebord-blue">CODE</span><span class="codebord-red">BORD</span></div>
+              <p style="color: #6c757d; margin: 0;">Employee Profile Update</p>
+            </div>
+            <h2 style="color: #091e65; margin-bottom: 16px;">Email Address Updated</h2>
+            <p>Hello <strong>${notice.name}</strong>,</p>
+            <p>Your employee account email has been updated by an administrator. Your login <strong>password remains the same</strong>.</p>
+            <div class="box">
+              <div class="row"><span class="label">Employee ID:</span> <span class="value">${notice.employeeId}</span></div>
+              <div class="row"><span class="label">New Email:</span> <span class="value">${notice.newEmail}</span></div>
+              <div class="row"><span class="label">Previous Email:</span> <span class="value">${notice.oldEmail}</span></div>
+            </div>
+            <div class="info">
+              For security, your current session has been signed out. Please login again using your new email (or your Employee ID) and your existing password.
+            </div>
+            <div style="text-align: center;">
+              <a href="${process.env.NEXTAUTH_URL || 'http://localhost:3000'}" class="login-button">Login to Employee Portal</a>
+            </div>
+            <div class="footer">
+              <p>This is an automated message from Codebord Employee Management System.</p>
+              <p>If you did not request this change, please contact your administrator immediately.</p>
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+    });
+
+    if (error) {
+      console.error('Email update notification error:', error);
+      throw new Error(`Failed to send email update notification: ${error.message}`);
+    }
+    return data;
+  } catch (error) {
+    console.error('Email update notification service error:', error);
+    throw error;
+  }
+}
