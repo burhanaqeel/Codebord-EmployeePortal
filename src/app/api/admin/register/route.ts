@@ -17,6 +17,11 @@ export async function POST(request: NextRequest) {
       // Require authentication for subsequent admin creation
       const auth = await requireAdmin(request);
       if ('response' in auth) return auth.response;
+      // Only super admin can create more admins
+      const creator = await Admin.findById(auth.admin._id);
+      if (!creator || !(creator as any).isSuperAdmin) {
+        return NextResponse.json({ error: 'Only the first admin can create new admins' }, { status: 403 });
+      }
     }
 
     const { name, email, password, confirmPassword } = await request.json();
@@ -56,7 +61,9 @@ export async function POST(request: NextRequest) {
     const admin = new Admin({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      password
+      password,
+      isSuperAdmin: existingAdminCount === 0, // first admin only
+      status: 'active'
     });
 
     await admin.save();

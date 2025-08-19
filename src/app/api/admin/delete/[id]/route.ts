@@ -34,6 +34,17 @@ export async function DELETE(
       );
     }
 
+    // Only super admin can delete admins
+    const requester = await Admin.findById(auth.admin._id);
+    if (!requester || !(requester as any).isSuperAdmin) {
+      return NextResponse.json({ error: 'Only the first admin can delete admins' }, { status: 403 });
+    }
+
+    // The first admin account itself cannot be deleted
+    if ((admin as any).isSuperAdmin) {
+      return NextResponse.json({ error: 'The first admin account cannot be deleted' }, { status: 403 });
+    }
+
     // Delete admin
     const deletedAdmin = await Admin.findByIdAndDelete(id);
 

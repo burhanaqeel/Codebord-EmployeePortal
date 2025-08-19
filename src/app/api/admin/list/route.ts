@@ -21,6 +21,8 @@ export async function GET(request: NextRequest) {
         name: admin.name,
         email: admin.email,
         profileImage: admin.profileImage,
+        isSuperAdmin: (admin as any).isSuperAdmin || false,
+        status: (admin as any).status || 'active',
         createdAt: admin.createdAt,
         updatedAt: admin.updatedAt
       }))

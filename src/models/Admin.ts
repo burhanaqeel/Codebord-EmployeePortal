@@ -6,6 +6,8 @@ export interface IAdmin extends mongoose.Document {
   email: string;
   password: string;
   profileImage?: string;
+  isSuperAdmin: boolean;
+  status: 'active' | 'inactive';
   tokenVersion: number;
   createdAt: Date;
   updatedAt: Date;
@@ -35,6 +37,17 @@ const adminSchema = new mongoose.Schema<IAdmin>({
   profileImage: {
     type: String,
     default: null
+  },
+  isSuperAdmin: {
+    type: Boolean,
+    default: false,
+    index: true
+  },
+  status: {
+    type: String,
+    enum: ['active', 'inactive'],
+    default: 'active',
+    index: true
   },
   tokenVersion: {
     type: Number,

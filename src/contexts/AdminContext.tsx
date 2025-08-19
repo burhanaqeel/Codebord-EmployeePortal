@@ -8,6 +8,8 @@ interface AdminData {
   name: string;
   email: string;
   profileImage?: string;
+  isSuperAdmin?: boolean;
+  status?: 'active' | 'inactive';
   createdAt: string;
   updatedAt: string;
 }

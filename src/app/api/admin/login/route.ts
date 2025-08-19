@@ -30,6 +30,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Disallow inactive admins
+    if ((admin as any).status && (admin as any).status !== 'active') {
+      return NextResponse.json(
+        { error: 'Admin account is inactive' },
+        { status: 403 }
+      );
+    }
+
     // Check password
     const isPasswordValid = await admin.comparePassword(password);
     if (!isPasswordValid) {

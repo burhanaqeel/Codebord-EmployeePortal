@@ -53,7 +53,9 @@ export async function POST(request: NextRequest) {
     const admin = new Admin({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      password
+      password,
+      isSuperAdmin: true,
+      status: 'active'
     });
 
     await admin.save();
