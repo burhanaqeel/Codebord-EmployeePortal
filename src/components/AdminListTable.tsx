@@ -23,14 +23,10 @@ export default function AdminListTable() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
   const [createForm, setCreateForm] = useState({ name: '', email: '', password: '', confirmPassword: '' });
+  const [lastUpdated, setLastUpdated] = useState<string>('');
 
   useEffect(() => {
     fetchAdmins();
-    
-    // Set up polling to refresh admin list every 5 seconds
-    const interval = setInterval(fetchAdmins, 5000);
-    
-    return () => clearInterval(interval);
   }, []);
 
   const fetchAdmins = async () => {
@@ -43,6 +39,7 @@ export default function AdminListTable() {
       if (response.ok) {
         const data = await response.json();
         setAdmins(data.admins || []);
+        setLastUpdated(new Date().toLocaleString());
       } else {
         setError('Failed to fetch admin list');
       }
@@ -243,16 +240,14 @@ export default function AdminListTable() {
                      <div className="flex items-center space-x-4">
                        {admin.profileImage ? (
                          <img 
-                           src={`/api/admin/profile-image/${encodeURIComponent(admin.profileImage.split('/').pop() || '')}`}
+                           src={admin.profileImage}
                            alt={admin.name}
                            className="w-12 h-12 rounded-full object-cover border-2 border-[#091e65]"
                            onError={(e) => {
-                             console.error('Failed to load admin profile image:', e);
-                             e.currentTarget.style.display = 'none';
+                             (e.currentTarget as HTMLImageElement).style.display = 'none';
                              e.currentTarget.nextElementSibling?.classList.remove('hidden');
                            }}
                            onLoad={(e) => {
-                             // Hide fallback when image loads successfully
                              e.currentTarget.nextElementSibling?.classList.add('hidden');
                            }}
                          />
@@ -331,7 +326,7 @@ export default function AdminListTable() {
           <div className="mt-8 pt-6 border-t-2 border-[#091e65]">
             <div className="flex items-center justify-between text-sm text-gray-600">
               <span className="font-medium">Showing {admins.length} admin user{admins.length !== 1 ? 's' : ''}</span>
-              <span className="font-medium">Last updated: {new Date().toLocaleString()}</span>
+              <span className="font-medium">Last updated: {lastUpdated || '—'}</span>
             </div>
           </div>
         )}

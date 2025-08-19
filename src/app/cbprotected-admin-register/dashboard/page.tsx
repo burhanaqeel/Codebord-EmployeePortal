@@ -574,9 +574,7 @@ export default function AdminDashboard() {
                   src={profileImage} 
                   alt="Profile" 
                   className="w-10 h-10 rounded-full object-cover border-2 border-gray-200"
-                  onLoad={() => console.log('Profile image loaded successfully')}
-                  onError={(e) => {
-                    console.error('Failed to load profile image:', e);
+                  onError={() => {
                     setProfileImage(null);
                   }}
                 />
