@@ -21,13 +21,29 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Find employee by email or employee ID
-    const employee = await Employee.findOne({
+    // Normalize identifier to avoid whitespace/case issues
+    const normalized = String(identifier).trim();
+    
+    // Find employee by email (case-insensitive exact) or employee ID (case-insensitive exact)
+    let employee = await Employee.findOne({
       $or: [
-        { email: identifier.toLowerCase() },
-        { employeeId: identifier.toUpperCase() }
+        { email: normalized.toLowerCase() },
+        { employeeId: normalized.toUpperCase() }
       ]
     });
+
+    // Fallback: strict case-insensitive equality using regex, in case of legacy casing issues
+    if (!employee) {
+      const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const emailRegex = new RegExp('^' + escape(normalized) + '$', 'i');
+      const idRegex = new RegExp('^' + escape(normalized) + '$', 'i');
+      employee = await Employee.findOne({
+        $or: [
+          { email: emailRegex },
+          { employeeId: idRegex }
+        ]
+      });
+    }
 
     if (!employee) {
       return NextResponse.json(
