@@ -6,7 +6,14 @@ export function middleware(request: NextRequest) {
   response.headers.set('X-Frame-Options', 'DENY');
   response.headers.set('X-Content-Type-Options', 'nosniff');
   response.headers.set('Referrer-Policy', 'no-referrer');
-  response.headers.set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+  const pathname = request.nextUrl.pathname || '';
+  const allowCameraOnThisRoute = pathname.startsWith('/employee-portal');
+  response.headers.set(
+    'Permissions-Policy',
+    allowCameraOnThisRoute
+      ? 'camera=(self), microphone=(), geolocation=()'
+      : 'camera=(), microphone=(), geolocation=()'
+  );
   response.headers.set(
     'Content-Security-Policy',
     "default-src 'self'; img-src 'self' data: blob:; media-src 'self' blob:; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self'; frame-ancestors 'none'"

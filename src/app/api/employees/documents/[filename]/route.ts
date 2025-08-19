@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import path from 'path';
-import { requireAdmin } from '@/lib/auth';
+import { getAuthContext } from '@/lib/auth';
 import { isSafeFilename, isAllowedExtension } from '@/lib/security';
 import connectDB from '@/lib/mongodb';
 import Employee from '@/models/Employee';
@@ -11,8 +11,8 @@ export async function GET(
   { params }: { params: Promise<{ filename: string }> }
 ) {
   try {
-    // Admin only
-    const auth = await requireAdmin(request);
+    // Allow either admin or employee; employees can only access their own documents
+    const auth = await getAuthContext(request);
     if ('response' in auth) return auth.response;
     // Await the params as required in Next.js 15
     const { filename } = await params;
@@ -58,30 +58,61 @@ export async function GET(
     // Attempt to resolve the decoded filename to an existing employee doc field or attendance image URL
     await connectDB();
     const candidates: string[] = [];
-    const maybeEmployees = await Employee.find({
-      $or: [
-        { idCardFront: { $regex: decodedFilename + '$' } },
-        { idCardBack: { $regex: decodedFilename + '$' } },
-        { offerLetter: { $regex: decodedFilename + '$' } },
-        { profileImage: { $regex: decodedFilename + '$' } },
-      ]
-    }).limit(5);
-    for (const e of maybeEmployees) {
-      [e.idCardFront, e.idCardBack, e.offerLetter, (e as any).profileImage].forEach((u) => {
-        if (typeof u === 'string' && u.endsWith('/' + decodedFilename)) candidates.push(u);
-      });
-    }
-    if (candidates.length === 0) {
-      const maybeAttendance = await Attendance.find({
+    
+    // If admin, we can search globally. If employee, restrict to their records only.
+    const employeeQueryFilter = 'admin' in auth
+      ? {}
+      : { _id: (undefined as any) };
+    
+    if ('admin' in auth) {
+      const maybeEmployees = await Employee.find({
         $or: [
-          { clockInImage: { $regex: decodedFilename + '$' } },
-          { clockOutImage: { $regex: decodedFilename + '$' } }
+          { idCardFront: { $regex: decodedFilename + '$' } },
+          { idCardBack: { $regex: decodedFilename + '$' } },
+          { offerLetter: { $regex: decodedFilename + '$' } },
+          { profileImage: { $regex: decodedFilename + '$' } },
         ]
       }).limit(5);
-      for (const a of maybeAttendance) {
-        [a.clockInImage, a.clockOutImage].forEach((u) => {
+      for (const e of maybeEmployees) {
+        [e.idCardFront, e.idCardBack, e.offerLetter, (e as any).profileImage].forEach((u) => {
           if (typeof u === 'string' && u.endsWith('/' + decodedFilename)) candidates.push(u);
         });
+      }
+    } else if ('employee' in auth) {
+      const me = await Employee.findOne({ employeeId: auth.employee.employeeId });
+      if (me) {
+        [me.idCardFront, me.idCardBack, me.offerLetter, (me as any).profileImage].forEach((u) => {
+          if (typeof u === 'string' && u.endsWith('/' + decodedFilename)) candidates.push(u);
+        });
+      }
+    }
+
+    if (candidates.length === 0) {
+      if ('admin' in auth) {
+        const maybeAttendance = await Attendance.find({
+          $or: [
+            { clockInImage: { $regex: decodedFilename + '$' } },
+            { clockOutImage: { $regex: decodedFilename + '$' } }
+          ]
+        }).limit(5);
+        for (const a of maybeAttendance) {
+          [a.clockInImage, a.clockOutImage].forEach((u) => {
+            if (typeof u === 'string' && u.endsWith('/' + decodedFilename)) candidates.push(u);
+          });
+        }
+      } else if ('employee' in auth) {
+        const ownAttendance = await Attendance.find({
+          employeeId: auth.employee.employeeId,
+          $or: [
+            { clockInImage: { $regex: decodedFilename + '$' } },
+            { clockOutImage: { $regex: decodedFilename + '$' } }
+          ]
+        }).limit(5);
+        for (const a of ownAttendance) {
+          [a.clockInImage, a.clockOutImage].forEach((u) => {
+            if (typeof u === 'string' && u.endsWith('/' + decodedFilename)) candidates.push(u);
+          });
+        }
       }
     }
 
