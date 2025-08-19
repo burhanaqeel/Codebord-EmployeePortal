@@ -23,12 +23,12 @@ export const metadata: Metadata = {
   },
   icons: {
     icon: [
-      { url: '/favicon.svg', type: 'image/svg+xml', rel: 'icon', sizes: 'any' },
+      { url: '/icon.svg', type: 'image/svg+xml', rel: 'icon', sizes: 'any' },
     ],
     shortcut: [
-      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/icon.svg', type: 'image/svg+xml' },
     ],
-    apple: '/favicon.svg',
+    apple: '/icon.svg',
   },
   manifest: '/site.webmanifest',
 };

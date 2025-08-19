@@ -19,9 +19,8 @@ export default function AdminDashboard() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
-  // Debug profile image state changes
+  // Profile image state changes (silent)
   useEffect(() => {
-    console.log('Profile image state changed:', profileImage ? 'Has image' : 'No image');
   }, [profileImage]);
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
@@ -54,19 +53,15 @@ export default function AdminDashboard() {
 
   // Load profile image from admin data
   useEffect(() => {
-    console.log('Admin data changed:', admin);
     if (admin?.profileImage) {
-      console.log('Loading profile image from admin data:', admin.profileImage);
       setProfileImage(admin.profileImage);
     } else {
-      console.log('No profile image found in admin data');
       setProfileImage(null);
     }
   }, [admin]);
 
-  // Debug profile image state changes
+  // Profile image state changes (silent)
   useEffect(() => {
-    console.log('Profile image state changed:', profileImage ? 'Has image' : 'No image');
   }, [profileImage]);
 
   // Poll pending password request count when Employees tab is active
