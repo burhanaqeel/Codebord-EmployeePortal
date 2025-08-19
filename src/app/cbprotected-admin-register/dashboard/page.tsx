@@ -17,6 +17,7 @@ export default function AdminDashboard() {
   const [showPasswordDropdown, setShowPasswordDropdown] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
   const [profileImage, setProfileImage] = useState<string | null>(null);
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
 
   // Debug profile image state changes
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function AdminDashboard() {
   const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
   const [isChangingPassword, setIsChangingPassword] = useState(false);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
+  const [showMobileChangePassword, setShowMobileChangePassword] = useState(false);
   
   // Employee management states
   const [showCreateEmployee, setShowCreateEmployee] = useState(false);
@@ -502,8 +504,8 @@ export default function AdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar */}
-      <div className="w-64 bg-white shadow-lg flex flex-col">
+      {/* Sidebar - desktop */}
+      <div className="hidden lg:flex w-64 bg-white shadow-lg flex-col">
         {/* Logo Section */}
         <div className="p-6 border-b border-gray-200">
           <div className="text-center">
@@ -648,8 +650,145 @@ export default function AdminDashboard() {
         </div>
       </div>
 
+      {/* Mobile header */}
+      <div className="lg:hidden fixed inset-x-0 top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
+        <div className="h-14 flex items-center justify-between px-4">
+          <button
+            onClick={() => setIsMobileNavOpen(true)}
+            className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
+            aria-label="Open navigation menu"
+          >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <div className="inline-flex items-baseline gap-1">
+            <span className="text-xl font-extrabold text-[#091e65] tracking-tight">CODE</span>
+            <span className="text-xl font-extrabold text-[#dc2626] tracking-tight">BORD</span>
+          </div>
+          <div className="w-6" />
+        </div>
+      </div>
+
+      {/* Mobile drawer */}
+      {isMobileNavOpen && (
+        <div className="lg:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsMobileNavOpen(false)} />
+          <div className="relative w-72 max-w-[80%] h-full bg-white shadow-2xl flex flex-col">
+            {/* Drawer content - reuse sidebar sections */}
+            <div className="p-6 border-b border-gray-200">
+              <div className="flex items-center justify-between">
+                <div className="inline-block">
+                  <span className="text-2xl font-bold text-[#091e65]">CODE</span>
+                  <span className="text-2xl font-bold text-[#dc2626]">BORD</span>
+                </div>
+                <button onClick={() => setIsMobileNavOpen(false)} className="p-2 rounded-md hover:bg-gray-100" aria-label="Close navigation">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+              </div>
+              <div className="mt-2">
+                <span className="inline-block bg-yellow-400 text-gray-900 px-3 py-1 rounded-full text-xs font-semibold">Admin Panel</span>
+              </div>
+              <div className="mt-4 flex items-center space-x-3">
+                <div className="w-10 h-10 rounded-full overflow-hidden bg-gradient-to-br from-[#091e65] to-[#dc2626] flex items-center justify-center">
+                  {profileImage ? (
+                    <img src={profileImage} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">{admin?.name}</div>
+                  <div className="text-xs text-gray-500 truncate">{admin?.email}</div>
+                </div>
+              </div>
+            </div>
+            <nav className="flex-1 p-4 overflow-y-auto">
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => { setActiveTab('admins'); setIsMobileNavOpen(false); }}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors duration-200 flex items-center space-x-3 ${
+                      activeTab === 'admins' ? 'bg-[#091e65] text-white' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    <span>Admins</span>
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => { setActiveTab('employees'); setIsMobileNavOpen(false); }}
+                    className={`w-full text-left px-4 py-3 rounded-lg transition-colors duration-200 flex items-center space-x-3 ${
+                      activeTab === 'employees' ? 'bg-[#091e65] text-white' : 'text-gray-700 hover:bg-gray-100'
+                    }`}
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
+                    </svg>
+                    <span>Employees</span>
+                  </button>
+                </li>
+              </ul>
+            </nav>
+            {/* Account actions */}
+            <div className="p-4 border-t border-gray-200 space-y-3">
+              <button
+                onClick={() => setShowMobileChangePassword((v) => !v)}
+                className="w-full px-4 py-2 text-sm font-medium text-[#091e65] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+              >
+                {showMobileChangePassword ? 'Hide Change Password' : 'Change Password'}
+              </button>
+              {showMobileChangePassword && (
+                <div className="space-y-3">
+                  <input
+                    type="password"
+                    placeholder="Current Password"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent"
+                  />
+                  <input
+                    type="password"
+                    placeholder="New Password"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent"
+                  />
+                  <input
+                    type="password"
+                    placeholder="Confirm Password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent"
+                  />
+                  <button
+                    onClick={async () => { await handlePasswordChange(); setShowMobileChangePassword(false); }}
+                    disabled={isChangingPassword}
+                    className="w-full px-3 py-2 bg-gradient-to-r from-[#091e65] to-[#dc2626] text-white text-sm font-medium rounded-md hover:from-[#dc2626] hover:to-[#091e65] transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {isChangingPassword ? 'Changing...' : 'Change Password'}
+                  </button>
+                </div>
+              )}
+              <button
+                onClick={handleLogout}
+                className="w-full px-4 py-2 text-sm font-medium text-[#dc2626] bg-red-50 hover:bg-red-100 rounded-lg transition-colors duration-200 flex items-center justify-center space-x-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto pt-14 lg:pt-0">
         {/* Global Message Display */}
         {(passwordMessage.text || profileMessage.text) && (
           <div className="sticky top-0 z-40 p-4">

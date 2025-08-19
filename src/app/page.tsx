@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
@@ -123,7 +122,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="relative h-dvh lg:min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-hidden overflow-x-hidden">
       {/* Ambient Accents */}
       <div className="pointer-events-none absolute -top-24 -right-24 h-80 w-80 rounded-full bg-gradient-to-br from-[#091e65] to-[#dc2626] opacity-20 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-gradient-to-tr from-indigo-400 to-pink-400 opacity-20 blur-3xl" />
@@ -131,14 +130,14 @@ export default function LoginPage() {
       {/* Vertical soft divider for large screens */}
       <div className="hidden lg:block absolute inset-y-0 left-1/2 w-px -translate-x-1/2 bg-gradient-to-b from-transparent via-[#091e65]/10 to-transparent" />
 
-      <div className="relative grid grid-cols-1 lg:grid-cols-2 min-h-screen">
+      <div className="relative grid grid-cols-1 lg:grid-cols-2 h-dvh lg:min-h-screen items-stretch gap-y-4 lg:gap-y-0 overflow-hidden">
         {/* Left - Brand & Messaging (full height, no card) */}
-        <section className="flex items-center lg:justify-end px-8 lg:px-16 py-16">
+        <section className="row-start-1 lg:row-start-auto flex items-center lg:justify-end px-8 lg:px-16 py-6 lg:py-16 h-full">
           <div className="max-w-2xl">
             <div className="mb-8">
               <div className="inline-block">
-                <span className="text-6xl font-extrabold text-[#091e65] tracking-tight">CODE</span>
-                <span className="text-6xl font-extrabold text-[#dc2626] tracking-tight">BORD</span>
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#091e65] tracking-tight">CODE</span>
+                <span className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-[#dc2626] tracking-tight">BORD</span>
               </div>
               <div className="mt-3">
                 <span className="inline-flex items-center gap-2 bg-white/80 text-gray-900 px-4 py-2 rounded-2xl text-xs font-semibold border border-white/60">
@@ -147,15 +146,15 @@ export default function LoginPage() {
               </div>
             </div>
 
-            <h1 className="text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight">
               Premium access to your workday
             </h1>
-            <p className="mt-4 text-gray-600 text-lg">
+            <p className="mt-3 sm:mt-4 text-gray-600 text-base sm:text-lg">
               Sign in to view your profile, documents, and mark attendance with live camera capture.
             </p>
 
             {/* Inline feature chips (no cards) */}
-            <div className="mt-8 flex flex-wrap gap-3">
+            <div className="hidden md:flex mt-6 lg:mt-8 flex-wrap gap-3">
               <span className="px-3 py-1.5 rounded-full bg-white/70 backdrop-blur text-sm text-gray-800 border border-white/60">🔒 Secure by design</span>
               <span className="px-3 py-1.5 rounded-full bg-white/70 backdrop-blur text-sm text-gray-800 border border-white/60">🕐 Smart attendance</span>
               <span className="px-3 py-1.5 rounded-full bg-white/70 backdrop-blur text-sm text-gray-800 border border-white/60">📄 Documents on hand</span>
@@ -165,8 +164,8 @@ export default function LoginPage() {
         </section>
 
         {/* Right - Full-height login panel (no box) */}
-        <section className="relative bg-white/55 backdrop-blur-xl lg:pl-16 px-8 py-16 flex items-center">
-          <div className="w-full">
+        <section className="row-start-2 lg:row-start-auto relative bg-white lg:bg-white/55 lg:supports-[backdrop-filter]:backdrop-blur-xl lg:pl-16 px-8 py-6 lg:py-16 flex items-center h-full">
+          <div className="w-full max-w-md lg:max-w-xl mx-auto">
             {/* Message Banner */}
             {message.text && (
               <div className={`mb-6 p-4 rounded-xl text-sm ${
@@ -179,11 +178,11 @@ export default function LoginPage() {
             )}
 
             <div className="mb-8">
-              <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
+              <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
               <p className="text-gray-600">Sign in to your employee account</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-6 max-w-xl">
+            <form onSubmit={handleSubmit} className="space-y-5">
               {/* Employee ID/Email Field */}
               <div>
                 <label htmlFor="identifier" className="block text-sm font-semibold text-gray-700 mb-2">
@@ -202,7 +201,8 @@ export default function LoginPage() {
                     required
                     value={formData.identifier}
                     onChange={handleInputChange}
-                    className="block w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent transition-all duration-300 bg-white/70 hover:bg-white"
+                    autoComplete="username email"
+                    className="block w-full pl-12 pr-4 py-3.5 sm:py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent transition-all duration-300 bg-white/70 hover:bg-white"
                     placeholder="Enter Employee ID or Email"
                   />
                 </div>
@@ -226,7 +226,8 @@ export default function LoginPage() {
                     required
                     value={formData.password}
                     onChange={handleInputChange}
-                    className="block w-full pl-12 pr-4 py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent transition-all duration-300 bg-white/70 hover:bg-white"
+                    autoComplete="current-password"
+                    className="block w-full pl-12 pr-4 py-3.5 sm:py-4 border border-gray-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-[#091e65] focus:border-transparent transition-all duration-300 bg-white/70 hover:bg-white"
                     placeholder="Enter your password"
                   />
                 </div>
@@ -243,7 +244,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full max-w-xl flex justify-center py-4 px-6 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-[#091e65] to-[#1e40af] hover:from-[#1e40af] hover:to-[#091e65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#091e65] transition-all duration-300 disabled:opacity-50"
+                className="w-full flex justify-center py-4 px-6 rounded-2xl text-sm font-semibold text-white bg-gradient-to-r from-[#091e65] to-[#1e40af] hover:from-[#1e40af] hover:to-[#091e65] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#091e65] transition-all duration-300 disabled:opacity-50"
               >
                 {loading ? 'Signing In...' : 'Sign In'}
               </button>

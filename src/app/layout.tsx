@@ -22,8 +22,12 @@ export const metadata: Metadata = {
     telephone: false,
   },
   icons: {
-    icon: '/favicon.svg',
-    shortcut: '/favicon.svg',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml', rel: 'icon', sizes: 'any' },
+    ],
+    shortcut: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
     apple: '/favicon.svg',
   },
   manifest: '/site.webmanifest',

@@ -49,6 +49,7 @@ export default function EmployeePortal() {
   const [profileImage, setProfileImage] = useState<string | null>(null);
   const [isUploadingImage, setIsUploadingImage] = useState(false);
   const [profileMessage, setProfileMessage] = useState({ type: '', text: '' });
+  const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: '',
     newPassword: '',
@@ -674,23 +675,33 @@ export default function EmployeePortal() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 overflow-x-hidden">
       {/* Professional Header */}
       <header className="bg-white shadow-sm border-b border-gray-100 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6">
           <div className="flex items-center justify-between h-16">
-            {/* Left Side - Logo */}
-            <div className="flex items-center space-x-4">
+            {/* Left Side - Mobile menu + Logo */}
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                className="md:hidden p-2 rounded-md text-gray-600 hover:bg-gray-100"
+                aria-label="Open navigation menu"
+                onClick={() => setIsMobileNavOpen(true)}
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              </button>
               <div className="text-center">
-                <div className="text-2xl font-bold tracking-tight">
+                <div className="text-xl md:text-2xl font-bold tracking-tight">
                   <span className="text-[#091e65]">CODE</span>
                   <span className="text-[#dc2626]">BORD</span>
                 </div>
-                <div className="text-xs font-medium text-gray-500 mt-1 tracking-wider uppercase">Employee Portal</div>
+                <div className="text-[10px] md:text-xs font-medium text-gray-500 mt-1 tracking-wider uppercase">Employee Portal</div>
               </div>
             </div>
 
-            {/* Center - Navigation */}
+            {/* Center - Navigation (desktop) */}
             <div className="hidden md:flex items-center space-x-1">
               <button 
                 onClick={() => {
@@ -804,6 +815,39 @@ export default function EmployeePortal() {
         </div>
       </header>
 
+      {/* Mobile drawer */}
+      {isMobileNavOpen && (
+        <div className="md:hidden fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setIsMobileNavOpen(false)} />
+          <div className="relative ml-auto h-full w-72 max-w-[80%] bg-white shadow-2xl p-5 flex flex-col">
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-lg font-bold"><span className="text-[#091e65]">CODE</span><span className="text-[#dc2626]">BORD</span></div>
+              <button onClick={() => setIsMobileNavOpen(false)} className="p-2 rounded-md hover:bg-gray-100" aria-label="Close navigation">
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+              </button>
+            </div>
+            <div className="space-y-2">
+              <button
+                onClick={() => { setActiveTab('employee-data'); setEmployeeSubTab('employee-data'); setIsMobileNavOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'employee-data' || activeTab === 'documents-data' ? 'bg-[#091e65] text-white' : 'text-[#091e65] hover:bg-gray-100'}`}
+              >
+                Employee Details
+              </button>
+              <button
+                onClick={() => { setActiveTab('attendance-system'); setIsMobileNavOpen(false); }}
+                className={`w-full text-left px-4 py-3 rounded-lg ${activeTab === 'attendance-system' ? 'bg-[#091e65] text-white' : 'text-[#091e65] hover:bg-gray-100'}`}
+              >
+                Attendance System
+              </button>
+            </div>
+            <div className="mt-6 border-t pt-4 space-y-2">
+              <button onClick={() => { setShowPasswordModal(true); setIsMobileNavOpen(false); }} className="w-full px-4 py-2 rounded-lg text-[#091e65] hover:bg-gray-100">Change Password</button>
+              <button onClick={() => { setIsMobileNavOpen(false); handleLogout(); }} className="w-full px-4 py-2 rounded-lg text-red-600 hover:bg-red-50">Sign Out</button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-6 py-8">
         {activeTab === 'employee-data' && (
@@ -821,8 +865,8 @@ export default function EmployeePortal() {
 
             {/* Employee Data Tabs */}
             {/* Full-width, cardless tab navigation */}
-            <div className="border-b border-[#091e65]/10">
-              <div className="flex gap-2">
+            <div className="border-b border-[#091e65]/10 overflow-x-auto">
+              <div className="flex gap-2 min-w-max">
                 <button
                   onClick={() => setEmployeeSubTab('employee-data')}
                   className={`px-4 py-3 font-medium transition-colors duration-200 relative ${
@@ -853,11 +897,11 @@ export default function EmployeePortal() {
             </div>
 
             {/* Tab Content */}
-            <div className="pt-8">
+            <div className="pt-6 sm:pt-8">
                 {employeeSubTab === 'employee-data' && (
                   <div className="space-y-8">
                     {/* Profile Section */}
-                    <div className="flex items-center space-x-6">
+                    <div className="flex items-center space-x-4 sm:space-x-6">
                       <div 
                         className="w-24 h-24 bg-gradient-to-br from-[#091e65] to-[#dc2626] rounded-2xl flex items-center justify-center shadow-lg overflow-hidden cursor-pointer transform hover:scale-105 transition-all duration-200"
                         onClick={handleProfileImageClick}
@@ -875,12 +919,12 @@ export default function EmployeePortal() {
                         )}
                       </div>
                       <div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-2">{employee.name}</h2>
-                        <p className="text-lg text-[#091e65] font-medium">{employee.designation}</p>
-                        <p className="text-gray-600">{employee.department}</p>
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-900 mb-1 sm:mb-2">{employee.name}</h2>
+                        <p className="text-[#091e65] font-medium">{employee.designation}</p>
+                        <p className="text-gray-600 text-sm sm:text-base">{employee.department}</p>
                         <button
                           onClick={handleProfileImageClick}
-                          className="mt-3 px-4 py-2 text-sm font-medium text-[#091e65] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
+                          className="mt-2 sm:mt-3 px-4 py-2 text-sm font-medium text-[#091e65] bg-blue-50 hover:bg-blue-100 rounded-lg transition-colors duration-200"
                         >
                           {profileImage ? 'Change Photo' : 'Add Photo'}
                         </button>
@@ -891,7 +935,7 @@ export default function EmployeePortal() {
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold text-gray-900">Information</h3>
                       <div className="border-t border-b border-gray-200 divide-y divide-gray-200">
-                        <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                           <div className="space-y-3">
                             <div>
                               <div className="text-sm text-gray-600">Employee ID</div>
@@ -948,7 +992,7 @@ export default function EmployeePortal() {
                     <div className="space-y-6">
                       <h3 className="text-lg font-semibold text-gray-900">Additional Information</h3>
                       <div className="border-t border-b border-gray-200 divide-y divide-gray-200">
-                        <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">
                           {/* Roles */}
                           <div>
                             <div className="text-sm text-gray-600 mb-2">Employee Roles</div>

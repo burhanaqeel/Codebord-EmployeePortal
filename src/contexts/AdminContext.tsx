@@ -1,6 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { usePathname } from 'next/navigation';
 
 interface AdminData {
   _id: string;
@@ -28,26 +29,25 @@ export function AdminProvider({ children }: { children: ReactNode }) {
   const [token, setToken] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const pathname = usePathname();
 
   useEffect(() => {
-    // Verify admin authentication status on component mount
+    // Only run admin verification on admin routes to avoid 401 noise on public pages
+    if (!pathname?.startsWith('/cbprotected-admin-register')) {
+      setIsLoading(false);
+      return;
+    }
+
     const verifyAuth = async () => {
       try {
-        const response = await fetch('/api/admin/verify', {
-          credentials: 'include',
-        });
-        
+        const response = await fetch('/api/admin/verify', { credentials: 'include' });
         if (response.ok) {
           const data = await response.json();
-          console.log('Admin verification response:', data);
           if (data.isAuthenticated && data.admin) {
-            console.log('Setting admin data:', data.admin);
             setAdmin(data.admin);
             setIsAuthenticated(true);
-            // Store admin data in localStorage for UI purposes
             localStorage.setItem('adminData', JSON.stringify(data.admin));
           } else {
-            // Clear any stale data
             localStorage.removeItem('adminToken');
             localStorage.removeItem('adminData');
             setAdmin(null);
@@ -55,16 +55,15 @@ export function AdminProvider({ children }: { children: ReactNode }) {
             setIsAuthenticated(false);
           }
         } else {
-          // Clear any stale data
+          // Silently ignore 401s; user is simply not logged in as admin
           localStorage.removeItem('adminToken');
           localStorage.removeItem('adminData');
           setAdmin(null);
           setToken(null);
           setIsAuthenticated(false);
         }
-      } catch (error) {
-        console.error('Error verifying admin authentication:', error);
-        // Clear any stale data
+      } catch {
+        // Network or other error; treat as unauthenticated without logging noise
         localStorage.removeItem('adminToken');
         localStorage.removeItem('adminData');
         setAdmin(null);
@@ -76,7 +75,7 @@ export function AdminProvider({ children }: { children: ReactNode }) {
     };
 
     verifyAuth();
-  }, []);
+  }, [pathname]);
 
   const login = (adminData: AdminData, token: string) => {
     setAdmin(adminData);

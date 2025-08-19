@@ -1,0 +1,14 @@
+<svg width="256" height="256" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="grad1" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#091e65;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#dc2626;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <circle cx="16" cy="16" r="15" fill="url(#grad1)"/>
+  <circle cx="16" cy="16" r="13" fill="url(#grad1)" opacity="0.9"/>
+  <text x="16" y="21" font-family="Arial, sans-serif" font-size="16" font-weight="900" text-anchor="middle" fill="white" letter-spacing="1">CB</text>
+  <circle cx="16" cy="16" r="14.5" stroke="rgba(255,255,255,0.4)" stroke-width="1" fill="none"/>
+</svg>
+
