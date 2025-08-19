@@ -26,7 +26,7 @@ export default function AdminRegisterPage() {
     setMessage({ type: '', text: '' });
 
     try {
-      const response = await fetch('/api/admin/register', {
+      const response = await fetch('/api/admin/first-time-setup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

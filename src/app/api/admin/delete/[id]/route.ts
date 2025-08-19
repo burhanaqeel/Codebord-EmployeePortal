@@ -26,7 +26,7 @@ export async function DELETE(
       );
     }
 
-    // Prevent self-deletion
+    // Prevent self-deletion always
     if (admin._id.toString() === auth.admin._id?.toString()) {
       return NextResponse.json(
         { error: 'You cannot delete your own account' },

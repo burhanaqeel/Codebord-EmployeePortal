@@ -8,20 +8,13 @@ export async function POST(request: NextRequest) {
     // Connect to MongoDB first
     await connectDB();
     
-    // Check if this is the first admin (no authentication required)
-    const existingAdminCount = await Admin.countDocuments();
-    if (existingAdminCount === 0) {
-      // Allow first admin creation without authentication
-      console.log('First admin creation - bypassing authentication');
-    } else {
-      // Require authentication for subsequent admin creation
-      const auth = await requireAdmin(request);
-      if ('response' in auth) return auth.response;
-      // Only super admin can create more admins
-      const creator = await Admin.findById(auth.admin._id);
-      if (!creator || !(creator as any).isSuperAdmin) {
-        return NextResponse.json({ error: 'Only the first admin can create new admins' }, { status: 403 });
-      }
+    // This endpoint is ONLY for creating admins by the first (super) admin.
+    // The initial admin account MUST be created via /api/admin/first-time-setup.
+    const auth = await requireAdmin(request);
+    if ('response' in auth) return auth.response;
+    const creator = await Admin.findById(auth.admin._id);
+    if (!creator || !(creator as any).isSuperAdmin) {
+      return NextResponse.json({ error: 'Only the first admin can create new admins' }, { status: 403 });
     }
 
     const { name, email, password, confirmPassword } = await request.json();
@@ -57,12 +50,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create new admin
+    // Create new admin (never super admin here)
     const admin = new Admin({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       password,
-      isSuperAdmin: existingAdminCount === 0, // first admin only
+      isSuperAdmin: false,
       status: 'active'
     });
 

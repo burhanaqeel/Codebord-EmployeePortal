@@ -16,6 +16,7 @@ export async function GET(request: NextRequest) {
     const admins = await Admin.find({}, '-password').sort({ createdAt: -1 });
 
     return NextResponse.json({
+      currentAdminId: auth.admin._id?.toString?.() || String(auth.admin._id),
       admins: admins.map(admin => ({
         _id: admin._id,
         name: admin.name,
